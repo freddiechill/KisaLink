@@ -249,31 +249,6 @@
             window.open(url, '_blank');
         }
 
-        // is.gd API'si tarayıcı üzerinden doğrudan fetch edilince CORS (Güvenlik) hatası verir.
-        // Bunu aşmak için JSONP adı verilen özel bir metot kullanıyoruz.
-        function fetchJsonp(url) {
-            return new Promise((resolve, reject) => {
-                const callbackName = 'isgd_callback_' + Math.round(100000 * Math.random());
-                
-                window[callbackName] = function(data) {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    resolve(data);
-                };
-
-                const script = document.createElement('script');
-                script.src = url + '&callback=' + callbackName;
-                
-                script.onerror = function() {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    reject(new Error('Ağ hatası'));
-                };
-                
-                document.body.appendChild(script);
-            });
-        }
-
         const submitBtn = document.getElementById('submitBtn');
         const originalBtnText = submitBtn.innerHTML;
 
@@ -302,8 +277,16 @@
                     apiUrl += `&shorturl=${encodeURIComponent(alias)}`;
                 }
 
-                // fetch yerine oluşturduğumuz fetchJsonp fonksiyonunu kullanıyoruz
-                const data = await fetchJsonp(apiUrl);
+                // Tarayıcıların güvenlik (CORS) veya Reklam Engelleyici bloklarını aşmak için AllOrigins proxy servisini kullanıyoruz.
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error('Proxy sunucusuna erişilemedi.');
+                }
+                
+                const proxyData = await response.json();
+                const data = JSON.parse(proxyData.contents);
 
                 if (data.errormessage) {
                     // is.gd servisinden dönen hataları Türkçe olarak göster
