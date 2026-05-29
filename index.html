@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KısaLink</title>
+    <title>KısaLink - Modern Link Kısaltıcı</title>
     
     <!-- Rubik Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -249,6 +249,31 @@
             window.open(url, '_blank');
         }
 
+        // is.gd API'si tarayıcı üzerinden doğrudan fetch edilince CORS (Güvenlik) hatası verir.
+        // Bunu aşmak için JSONP adı verilen özel bir metot kullanıyoruz.
+        function fetchJsonp(url) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'isgd_callback_' + Math.round(100000 * Math.random());
+                
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data);
+                };
+
+                const script = document.createElement('script');
+                script.src = url + '&callback=' + callbackName;
+                
+                script.onerror = function() {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('Ağ hatası'));
+                };
+                
+                document.body.appendChild(script);
+            });
+        }
+
         const submitBtn = document.getElementById('submitBtn');
         const originalBtnText = submitBtn.innerHTML;
 
@@ -271,14 +296,14 @@
             submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Kısaltılıyor...</span>';
 
             try {
-                // is.gd API'sini kullanarak gerçek kısaltma işlemi yap
+                // is.gd API url'sini oluştur
                 let apiUrl = `https://is.gd/create.php?format=json&url=${encodeURIComponent(url)}`;
                 if (alias) {
                     apiUrl += `&shorturl=${encodeURIComponent(alias)}`;
                 }
 
-                const response = await fetch(apiUrl);
-                const data = await response.json();
+                // fetch yerine oluşturduğumuz fetchJsonp fonksiyonunu kullanıyoruz
+                const data = await fetchJsonp(apiUrl);
 
                 if (data.errormessage) {
                     // is.gd servisinden dönen hataları Türkçe olarak göster
