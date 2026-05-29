@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KısaLink - Modern Link Kısaltıcı</title>
+    
+    <!-- Rubik Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Rubik', 'sans-serif'],
+                    },
+                    colors: {
+                        darkBg: '#050505',
+                        cardBg: '#111111',
+                        inputBg: '#1c1c1c',
+                        primary: '#6366f1',
+                        primaryHover: '#4f46e5',
+                        accent: '#10b981',
+                        accentHover: '#059669',
+                        textMain: '#ffffff',
+                        textMuted: '#a1a1aa'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Toast Animations */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .toast-enter {
+            animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+        .toast-exit {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+
+        /* Input focus animasyonu */
+        .input-transition {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-[#050505] text-[#ffffff] min-h-screen flex flex-col antialiased selection:bg-primary selection:text-white relative overflow-x-hidden">
+
+    <!-- Arka plan süslemeleri (Glow effects) -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] -z-10 pointer-events-none"></div>
+    <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[128px] -z-10 pointer-events-none"></div>
+
+    <div class="flex-grow flex flex-col items-center justify-center p-4 sm:p-8">
+        <main class="w-full max-w-3xl flex flex-col gap-8">
+            
+            <!-- Başlık Alanı -->
+            <div class="text-center flex flex-col gap-3">
+                <div class="inline-flex items-center justify-center gap-3 mb-2">
+                    <div class="bg-primary/20 text-primary p-3 rounded-2xl">
+                        <i class="fa-solid fa-link text-3xl"></i>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Kısa<span class="text-primary">Link</span></h1>
+                </div>
+                <p class="text-textMuted text-lg">Uzun bağlantılarınızı kolayca kısaltın ve paylaşın.</p>
+            </div>
+
+            <div class="bg-cardBg border border-white/5 p-6 md:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                <form id="shortenForm" class="flex flex-col gap-6 relative z-10">
+                    
+                    <!-- Uzun URL Input -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-textMuted ml-1">Uzun Bağlantı (URL)</label>
+                        <div class="relative bg-inputBg border border-white/10 rounded-xl overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary input-transition flex items-center">
+                            <div class="pl-5 text-textMuted/50">
+                                <i class="fa-solid fa-link"></i>
+                            </div>
+                            <input type="url" id="longUrl" required placeholder="https://cok-uzun-bir-baglanti-adresi.com/sayfa..." 
+                                class="w-full bg-transparent py-4 px-4 text-textMain placeholder-textMuted/50 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Özel Kısaltma Input (Simetrik ve Sabit) -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-textMuted ml-1">Özel Kısaltma (İsteğe Bağlı)</label>
+                        <div class="flex flex-col md:flex-row gap-3">
+                            <!-- items-stretch sayesinde içindeki kutular tam aynı yüksekliğe sahip olur -->
+                            <div class="relative flex-grow flex items-stretch bg-inputBg border border-white/10 rounded-xl overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary input-transition">
+                                
+                                <div class="bg-white/5 px-4 text-textMuted border-r border-white/5 font-medium select-none flex items-center justify-center">
+                                    is.gd/
+                                </div>
+                                
+                                <input type="text" id="customAlias" placeholder="benim-sayfam" pattern="[a-zA-Z0-9_-]+" title="Sadece harf, rakam, tire (-) ve alt çizgi (_) kullanabilirsiniz."
+                                    class="w-full bg-transparent py-4 px-4 text-textMain placeholder-textMuted/50 focus:outline-none">
+                            </div>
+                            
+                            <button type="submit" id="submitBtn" class="bg-primary hover:bg-primaryHover text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 md:w-auto w-full group whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed">
+                                <span>Kısalt</span>
+                                <i class="fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-textMuted/70 ml-1 mt-1"><i class="fa-solid fa-circle-info mr-1"></i> Boş bırakırsanız rastgele oluşturulur. İzin verilenler: Harf, rakam, tire (-) ve alt çizgi (_).</p>
+                    </div>
+                </form>
+            </div>
+
+            <div id="recentLinksContainer" class="flex flex-col gap-4 hidden">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-primary"></i> Son Kısaltmalarınız
+                    </h2>
+                </div>
+                
+                <div id="linksList" class="flex flex-col gap-4">
+                    <!-- Javascript ile burası doldurulacak -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Bildirim Konteyneri -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 flex flex-col gap-3 z-50"></div>
+
+    <script>
+        // Veritabanı niyetine LocalStorage kullanıyoruz
+        let shortenedLinks = JSON.parse(localStorage.getItem('kisaLinkDB')) || [];
+
+        // DOM Elementleri
+        const form = document.getElementById('shortenForm');
+        const longUrlInput = document.getElementById('longUrl');
+        const customAliasInput = document.getElementById('customAlias');
+        const recentLinksContainer = document.getElementById('recentLinksContainer');
+        const linksList = document.getElementById('linksList');
+        const toastContainer = document.getElementById('toastContainer');
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-enter flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl text-sm font-medium ${type === 'success' ? 'bg-accent/10 text-accent border border-accent/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`;
+            
+            const icon = type === 'success' ? '<i class="fa-solid fa-check-circle text-lg"></i>' : '<i class="fa-solid fa-triangle-exclamation text-lg"></i>';
+            
+            toast.innerHTML = `
+                ${icon}
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+
+            // 3 saniye sonra kaybolma efekti ekle ve DOM'dan sil
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Linkleri ekrana çiz
+        function renderLinks() {
+            if (shortenedLinks.length === 0) {
+                recentLinksContainer.classList.add('hidden');
+                return;
+            }
+            
+            recentLinksContainer.classList.remove('hidden');
+            linksList.innerHTML = '';
+
+            shortenedLinks.forEach(link => {
+                const linkCard = document.createElement('div');
+                linkCard.className = 'bg-cardBg border border-white/5 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-white/10 hover:shadow-lg';
+                
+                linkCard.innerHTML = `
+                    <div class="flex flex-col gap-1 overflow-hidden">
+                        <div class="flex items-center gap-2">
+                            <a href="javascript:void(0)" onclick="redirectMock('${link.originalUrl}')" class="text-primary font-bold text-lg hover:underline truncate cursor-pointer">
+                                ${link.shortUrl.replace('https://', '')}
+                            </a>
+                        </div>
+                        <span class="text-sm text-textMuted truncate" title="${link.originalUrl}">${link.originalUrl}</span>
+                        <span class="text-xs text-textMuted/50 mt-1">${link.date}</span>
+                    </div>
+                    <div class="flex items-center gap-2 sm:self-center self-end">
+                        <button onclick="copyToClipboard('${link.shortUrl}')" class="bg-white/5 hover:bg-white/10 text-white p-3 rounded-xl transition-colors tooltip relative group" aria-label="Kopyala">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                        <button onclick="deleteLink(${link.id})" class="bg-red-500/10 hover:bg-red-500/20 text-red-500 p-3 rounded-xl transition-colors" aria-label="Sil">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                
+                linksList.appendChild(linkCard);
+            });
+        }
+
+        function deleteLink(id) {
+            shortenedLinks = shortenedLinks.filter(link => link.id !== id);
+            localStorage.setItem('kisaLinkDB', JSON.stringify(shortenedLinks));
+            renderLinks();
+            showToast('Bağlantı silindi.', 'success');
+        }
+
+        // Panoya kopyala fonksiyonu
+        function copyToClipboard(text) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast('Bağlantı kopyalandı!', 'success');
+        }
+
+        // Demo yönlendirmesi
+        function redirectMock(url) {
+            window.open(url, '_blank');
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        const originalBtnText = submitBtn.innerHTML;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const url = longUrlInput.value.trim();
+            let alias = customAliasInput.value.trim();
+
+            // URL format kontrolü
+            try {
+                new URL(url);
+            } catch (_) {
+                showToast('Geçersiz bir URL girdiniz. Lütfen http:// veya https:// ile başladığından emin olun.', 'error');
+                return;
+            }
+
+            // Butonu yükleniyor durumuna al
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Kısaltılıyor...</span>';
+
+            try {
+                // is.gd API'sini kullanarak gerçek kısaltma işlemi yap
+                let apiUrl = `https://is.gd/create.php?format=json&url=${encodeURIComponent(url)}`;
+                if (alias) {
+                    apiUrl += `&shorturl=${encodeURIComponent(alias)}`;
+                }
+
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.errormessage) {
+                    // is.gd servisinden dönen hataları Türkçe olarak göster
+                    let errorMsg = 'Bir hata oluştu.';
+                    if (data.errormessage.toLowerCase().includes('already taken')) {
+                        errorMsg = 'Bu özel kısaltma zaten başkası tarafından alınmış! Başka bir isim deneyin.';
+                    } else if (data.errormessage.toLowerCase().includes('valid url')) {
+                        errorMsg = 'Girdiğiniz adres geçerli bir web sitesi gibi görünmüyor.';
+                    } else if (data.errormessage.toLowerCase().includes('alphanumeric')) {
+                        errorMsg = 'Özel kısaltmada geçersiz karakter var.';
+                    } else {
+                        errorMsg = 'API Hatası: ' + data.errormessage;
+                    }
+                    showToast(errorMsg, 'error');
+                } else if (data.shorturl) {
+                    // Başarılı olursa listeye ekle
+                    const newLink = {
+                        id: Date.now(),
+                        originalUrl: url,
+                        alias: alias || 'Rastgele',
+                        shortUrl: data.shorturl, // API'den gelen gerçek link (https://is.gd/...)
+                        date: new Date().toLocaleDateString('tr-TR')
+                    };
+
+                    shortenedLinks.unshift(newLink);
+                    localStorage.setItem('kisaLinkDB', JSON.stringify(shortenedLinks));
+                    
+                    longUrlInput.value = '';
+                    customAliasInput.value = '';
+                    
+                    renderLinks();
+                    showToast('Gerçek bağlantı başarıyla oluşturuldu!', 'success');
+                }
+            } catch (error) {
+                showToast('Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.', 'error');
+                console.error("API Hatası:", error);
+            } finally {
+                // Butonu eski haline döndür
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+
+        // Sayfa açıldığında linkleri çiz
+        renderLinks();
+    </script>
+</body>
+</html>
