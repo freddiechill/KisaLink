@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KısaLink - Modern Link Kısaltıcı</title>
+    <title>KısaLink</title>
     
-    <!-- Favicon (Site İkonu) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'><path fill='%236366f1' d='M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-127.4-55.5-179.5-7.9l-33.8 31.7c-18.3 17.2-46.5 17.2-64.8 0c-18.3-17.2-18.3-45.1 0-62.3c9.1-8.5 20.4-14.3 32.8-17.2C286.4-1.9 232.8 20.3 193.7 59.4c-56.5 56.5-56.5 148 0 204.5c50 50 127.4 55.5 179.5 7.9l33.8-31.7c18.3-17.2 46.5-17.2 64.8 0c18.3 17.2 18.3 45.1 0 62.3c-9.1 8.5-20.4 14.3-32.8 17.2C486.9 323.1 540.5 300.9 579.8 267.7zM34.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 127.4 55.5 179.5 7.9l33.8-31.7c18.3-17.2 46.5-17.2 64.8 0c18.3 17.2 18.3 45.1 0 62.3c-9.1-8.5-20.4-14.3-32.8-17.2C232.8 513.9 286.4 491.7 325.7 452.6c56.5-56.5 56.5-148 0-204.5c-50-50-127.4-55.5-179.5-7.9l-33.8 31.7c-18.3 17.2-46.5 17.2-64.8 0c18.3-17.2-18.3-45.1 0-62.3c9.1 8.5 20.4 14.3 32.8 17.2C153.1-1.9 99.5 20.3 60.4 59.4z'/></svg>">
+    <!-- Favicon (Site İkonu - Tüm tarayıcılarda sorunsuz çalışması için Base64 formatına çevrildi) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNTEyIj48cGF0aCBmaWxsPSIjNjM2NmYxIiBkPSJNNTc5LjggMjY3LjdjNTYuNS01Ni41IDU2LjUtMTQ4IDAtMjA0LjVjLTUwLTUwLTEyNy40LTU1LjUtMTc5LjUtNy45bC0zMy44IDMxLjdjLTE4LjMgMTcuMi00Ni41IDE3LjItNjQuOCAwYy0xOC4zLTE3LjItMTguMy00NS4xIDAtNjIuM2M5LjEtOC41IDIwLjQtMTQuMyAzMi44LTE3LjJDMjg2LjQtMS45IDIzMi44IDIwLjMgMTkzLjcgNTkuNGMtNTYuNSA1Ni41LTU2LjUgMTQ4IDAgMjA0LjVjNTAgNTAgMTI3LjQgNTUuNSAxNzkuNSA3LjlsMzMuOC0zMS43YzE4LjMtMTcuMiA0Ni41LTE3LjIgNjQuOCAwYzE4LjMgMTcuMiAxOC4zIDQ1LjEgMCA2Mi4zYy05LjEgOC41LTIwLjQgMTQuMy0zMi44IDE3LjJDNDg2LjkgMzIzLjEgNTQwLjUgMzAwLjkgNTc5LjggMjY3Ljd6TTM0LjIgMjQ0LjNjLTU2LjUgNTYuNS01Ni41IDE0OCAwIDIwNC41YzUwIDUwIDEyNy40 NTUuNSAxNzkuNSA3LjlsMzMuOC0zMS43YzE4LjMtMTcuMiA0Ni41LTE3LjIgNjQuOCAwYzE4LjMgMTcuMiAxOC4zIDQ1LjEgMCA2Mi4zYy05LjEtOC41LTIwLjQtMTQuMy0zMi44LTE3LjJDMjMyLjggNTEzLjkgMjg2LjQgNDkxLjcgMzI1LjcgNDUyLjZjNTYuNS01Ni41IDU2LjUtMTQ4IDAtMjA0LjVjLTUwLTUwLTEyNy40LTU1LjUtMTc5LjUtNy45bC0zMy44IDMxLjdjLTE4LjMgMTcuMi00Ni41IDE3LjItNjQuOCAwYy0xOC4zLTE3LjItMTguMy00NS4xIDAtNjIuM2M5LjEgOC41IDIwLjQgMTQuMyAzMi44IDE3LjJDMTUzLjEtMS45IDk5LjUgMjAuMyA2MC40IDU5LjR6Ii8+PC9zdmc+">
 
     <!-- Rubik Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,10 +76,29 @@
         .input-transition {
             transition: all 0.3s ease;
         }
+
+        /* UYGULAMA HİSSİYATI EKLENTİLERİ */
+        body {
+            /* Metinlerin altının çizilmesini/seçilmesini engelle (Mavi vurguyu kaldırır) */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            /* Mobilde dokunulan butonlardaki mavi parlama kutusunu engelle */
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Form kutularında yazı yazılabildiği için seçim buralarda aktif kalmalı */
+        input {
+            user-select: auto;
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+        }
     </style>
 </head>
 
-<body class="bg-[#050505] text-[#ffffff] min-h-screen flex flex-col antialiased selection:bg-primary selection:text-white relative overflow-x-hidden">
+<body class="bg-[#050505] text-[#ffffff] min-h-screen flex flex-col antialiased relative overflow-x-hidden">
 
     <!-- Arka plan süslemeleri (Glow effects) -->
     <div class="fixed top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] -z-10 pointer-events-none"></div>
